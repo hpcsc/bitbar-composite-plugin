@@ -10,7 +10,7 @@ pub struct Config {
 pub struct PluginConfig {
     #[serde(alias = "displayName")]
     pub display_name: String,
-    pub path: String,
+    pub command: String,
 }
 
 pub fn from_file(path: &str) -> Result<Config, error::CliError> {

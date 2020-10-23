@@ -9,10 +9,10 @@ fn from_file_returns_deserialized_configs_when_path_is_valid() {
     assert_eq!(Config {
         plugins: vec![PluginConfig {
             display_name: "Plugin 1".to_string(),
-            path: "/path/to/plugin/1".to_string(),
+            command: "/path/to/plugin/1".to_string(),
         }, PluginConfig {
             display_name: "Plugin 2".to_string(),
-            path: "/path/to/plugin/2".to_string(),
+            command: "/path/to/plugin/2".to_string(),
         }]
     }, result.unwrap())
 }
