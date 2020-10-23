@@ -3,7 +3,7 @@ use std::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let config_path = "./testdata/config.yaml";
+    let config_path = "./.bitbar-composite-plugin.yaml";
     let config = config::from_file(config_path)
             .expect(format!("failed to read config file {}", config_path)
             .as_str());

@@ -3,7 +3,7 @@ use bitbar_composite_plugin::config::{Config, PluginConfig};
 
 #[test]
 fn from_file_returns_deserialized_configs_when_path_is_valid() {
-    let result = config::from_file("./testdata/config.yaml");
+    let result = config::from_file("./.bitbar-composite-plugin.yaml");
 
     assert!(result.is_ok());
     assert_eq!(Config {
