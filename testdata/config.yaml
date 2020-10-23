@@ -1,5 +1,11 @@
 plugins:
   - displayName: Plugin 1
-    command: /path/to/plugin/1
+    command: bash
+    args:
+      - -c
+      - echo -n plugin-1
   - displayName: Plugin 2
-    command: /path/to/plugin/2
+    command: bash
+    args:
+      - -c
+      - echo -n plugin-2

@@ -11,6 +11,8 @@ pub struct PluginConfig {
     #[serde(alias = "displayName")]
     pub display_name: String,
     pub command: String,
+    #[serde(default)]
+    pub args: Vec<String>
 }
 
 pub fn from_file(path: &str) -> Result<Config, error::CliError> {
