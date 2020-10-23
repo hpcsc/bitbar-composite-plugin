@@ -1,7 +1,9 @@
 use crate::config;
 use crate::error::CliError;
 use crate::config::PluginConfig;
-use std::process::Command;
+use tokio::process::Command;
+use futures::stream::futures_unordered::FuturesUnordered;
+use futures::StreamExt;
 
 #[derive(PartialEq, Debug)]
 pub struct ExecutionOutput {
@@ -18,16 +20,19 @@ pub fn new(config: config::Config) -> Executor {
 }
 
 impl Executor {
-    pub fn execute(&self) -> Vec<Result<ExecutionOutput, CliError>> {
+    pub async fn execute(&self) -> Vec<Result<ExecutionOutput, CliError>> {
         self.config.plugins.iter()
             .map(Executor::execute_single_plugin)
-            .collect::<Vec<Result<ExecutionOutput, CliError>>>()
+            .collect::<FuturesUnordered<_>>()
+            .collect()
+            .await
     }
 
-    fn execute_single_plugin(plugin_config: &PluginConfig) -> Result<ExecutionOutput, CliError> {
+    async fn execute_single_plugin(plugin_config: &PluginConfig) -> Result<ExecutionOutput, CliError> {
         let output = Command::new(&plugin_config.command)
             .args(&plugin_config.args)
-            .output()?;
+            .output()
+            .await?;
 
         Ok(ExecutionOutput {
             plugin: plugin_config.display_name.clone(),
@@ -41,8 +46,8 @@ mod tests {
     use super::*;
     use config::{Config, PluginConfig};
 
-    #[test]
-    fn execute_returns_output_of_all_plugins_when_successful() {
+    #[tokio::test]
+    async fn execute_returns_output_of_all_plugins_when_successful() {
         let c = Config {
             plugins: vec![PluginConfig {
                 display_name: "Plugin 1".to_string(),
@@ -57,25 +62,29 @@ mod tests {
 
         let e = new(c);
 
-        let result = e.execute();
+        let result = e.execute().await;
 
         assert_eq!(2, result.len());
 
-        let expected_first_result = &ExecutionOutput{
+        let expected_first_result = ExecutionOutput{
             plugin: "Plugin 1".to_string(),
             output: "plugin-1".to_string()
         };
-        assert_eq!(expected_first_result, result[0].as_ref().unwrap());
+        let plugin_1_result = find_output_by_plugin(&result, "Plugin 1".to_string());
+        assert!(plugin_1_result.is_some());
+        assert_eq!(&expected_first_result, plugin_1_result.unwrap());
 
-        let expected_second_result = &ExecutionOutput{
+        let expected_second_result = ExecutionOutput{
             plugin: "Plugin 2".to_string(),
             output: "plugin-2".to_string()
         };
-        assert_eq!(expected_second_result, result[1].as_ref().unwrap());
+        let plugin_2_result = find_output_by_plugin(&result, "Plugin 2".to_string());
+        assert!(plugin_2_result.is_some());
+        assert_eq!(&expected_second_result, plugin_2_result.unwrap());
     }
 
-    #[test]
-    fn execute_returns_error_when_a_command_fails() {
+    #[tokio::test]
+    async fn execute_returns_error_when_a_command_fails() {
         let c = Config {
             plugins: vec![PluginConfig {
                 display_name: "Plugin 1".to_string(),
@@ -90,15 +99,38 @@ mod tests {
 
         let e = new(c);
 
-        let result = e.execute();
+        let result = e.execute().await;
 
         assert_eq!(2, result.len());
 
-        let expected_first_result = &ExecutionOutput{
+        let plugin_1_expected_result = ExecutionOutput{
             plugin: "Plugin 1".to_string(),
             output: "plugin-1".to_string()
         };
-        assert_eq!(expected_first_result, result[0].as_ref().unwrap());
-        assert!(result[1].is_err());
+        let plugin_1_result = find_output_by_plugin(&result, "Plugin 1".to_string());
+        assert!(plugin_1_result.is_some());
+        assert_eq!(&plugin_1_expected_result, plugin_1_result.unwrap());
+        assert!(find_error_output(&result).is_some());
+    }
+
+    fn find_output_by_plugin(result: &Vec<Result<ExecutionOutput, CliError>>, plugin_name: String) -> Option<&ExecutionOutput> {
+        for r in result {
+            if (*r).is_ok() &&
+                r.as_ref().unwrap().plugin == plugin_name {
+                return Some(r.as_ref().unwrap())
+            }
+        }
+
+        None
+    }
+
+    fn find_error_output(result: &Vec<Result<ExecutionOutput, CliError>>) -> Option<&CliError> {
+        for r in result {
+            if (*r).is_err() {
+                return r.as_ref().err()
+            }
+        }
+
+        None
     }
 }

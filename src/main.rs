@@ -1,19 +1,21 @@
 use bitbar_composite_plugin::{config, exec};
+use std::error::Error;
 
-fn main() {
-    let results = config::from_file("./testdata/config.yaml")
-        .map(exec::new)
-        .map(|e| e.execute());
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let config_path = "./testdata/config.yaml";
+    let config = config::from_file(config_path)
+            .expect(format!("failed to read config file {}", config_path)
+            .as_str());
 
-    match results {
-        Ok(execution_results) => {
-            for r in execution_results {
-                match r {
-                    Ok(out) => println!("{}: {:?}", out.plugin, out.output),
-                    Err(e) => println!("failed to execute with error {:?}", e)
-                }
-            }
+    let executor = exec::new(config);
+    let results = executor.execute().await;
+    for r in results {
+        match r {
+            Ok(out) => println!("{}: {:?}", out.plugin, out.output),
+            Err(e) => println!("failed to execute with error {:?}", e)
         }
-        Err(e) => println!("failed with error {:?}", e)
     }
+
+    Ok(())
 }
