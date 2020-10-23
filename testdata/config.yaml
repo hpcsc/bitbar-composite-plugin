@@ -1,0 +1,5 @@
+plugins:
+  - displayName: Plugin 1
+    path: /path/to/plugin/1
+  - displayName: Plugin 2
+    path: /path/to/plugin/2
