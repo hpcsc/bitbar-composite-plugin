@@ -29,6 +29,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
+          args: --release --all-features
 
       - name: Test
         uses: actions-rs/cargo@v1
@@ -46,3 +47,9 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: bitbar-composite-plugin-${{runner.os}}-${{github.sha}}
+          path: ./target/release/bitbar-composite-plugin
