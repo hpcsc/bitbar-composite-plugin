@@ -53,3 +53,33 @@ jobs:
         with:
           name: bitbar-composite-plugin-${{runner.os}}-${{github.sha}}
           path: ./target/release/bitbar-composite-plugin
+
+  publish:
+    name: Publish to Bintray
+    runs-on: ubuntu-18.04
+    needs: ci
+    steps:
+    - name: Download Linux artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: bitbar-composite-plugin-Linux-${{github.sha}}
+        path: ./bin
+
+    - name: Download MacOS artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: bitbar-composite-plugin-Linux-${{github.sha}}
+        path: ./bin
+
+    - name: List downloaded artifacts
+      run: ls -la ./bin
+
+    - name: Upload to Bintray
+      uses: hpcsc/upload-bintray-docker-action@v1
+      with:
+        repository: bitbar-composite-plugin
+        package: master
+        version: ${{github.sha}}
+        sourcePath: ./bin/bitbar-composite-plugin*
+        username: hpcsc
+        apiKey: ${{secrets.BINTRAY_API_KEY}}
