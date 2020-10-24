@@ -4,6 +4,7 @@ plugins:
     args:
       - -c
       - echo -n plugin-1
+    showInSubMenu: true
   - displayName: Plugin 2
     command: bash
     args:

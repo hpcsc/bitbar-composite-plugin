@@ -12,7 +12,9 @@ pub struct PluginConfig {
     pub display_name: String,
     pub command: String,
     #[serde(default)]
-    pub args: Vec<String>
+    pub args: Vec<String>,
+    #[serde(default, alias = "showInSubMenu")]
+    pub show_in_sub_menu: bool
 }
 
 pub fn from_file(path: &str) -> Result<Config, error::CliError> {

@@ -96,11 +96,13 @@ mod tests {
             plugins: vec![PluginConfig {
                 display_name: "Plugin 1".to_string(),
                 command: "bash".to_string(),
-                args: vec!["-c".to_string(), "echo -n 'plugin-1'".to_string()]
+                args: vec!["-c".to_string(), "echo -n 'plugin-1'".to_string()],
+                show_in_sub_menu: false
             }, PluginConfig {
                 display_name: "Plugin 2".to_string(),
                 command: "bash".to_string(),
-                args: vec!["-c".to_string(), "echo -n 'plugin-2'".to_string()]
+                args: vec!["-c".to_string(), "echo -n 'plugin-2'".to_string()],
+                show_in_sub_menu: false
             }]
         };
 
@@ -133,11 +135,13 @@ mod tests {
             plugins: vec![PluginConfig {
                 display_name: "Plugin 1".to_string(),
                 command: "bash".to_string(),
-                args: vec!["-c".to_string(), "echo -n 'plugin-1'".to_string()]
+                args: vec!["-c".to_string(), "echo -n 'plugin-1'".to_string()],
+                show_in_sub_menu: false
             }, PluginConfig {
                 display_name: "Plugin 2".to_string(),
                 command: "some-random-command".to_string(),
-                args: vec!()
+                args: vec!(),
+                show_in_sub_menu: false
             }]
         };
 
