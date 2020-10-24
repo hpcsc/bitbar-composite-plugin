@@ -65,7 +65,7 @@ impl Formatter<'_> {
         }
 
         input
-            .split("\n")
+            .split('\n')
             .filter(|s| !s.is_empty())
             .map(|s| format!("--{}", s))
             .collect::<Vec<String>>()
