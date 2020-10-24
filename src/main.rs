@@ -6,8 +6,7 @@ use std::{env, io};
 async fn main() -> Result<(), Box<dyn Error>> {
     let config_path = config_file_path().expect("failed to get config file path");
     let config = config::from_file(config_path.as_str())
-            .expect(format!("failed to read config file {}", config_path)
-            .as_str());
+        .expect(format!("failed to read config file {}", config_path).as_str());
 
     let executor = exec::new(&config);
     let results = executor.execute().await;

@@ -1,9 +1,9 @@
 use crate::config;
-use crate::exec::ExecutionResult;
 use crate::config::PluginConfig;
+use crate::exec::ExecutionResult;
 
 pub struct Formatter<'a> {
-    config: &'a config::Config
+    config: &'a config::Config,
 }
 
 pub fn new(config: &config::Config) -> Formatter {
@@ -12,7 +12,7 @@ pub fn new(config: &config::Config) -> Formatter {
 
 impl Formatter<'_> {
     pub fn format(&self, execution_results: Vec<ExecutionResult>) -> Vec<String> {
-        let mut output = vec!();
+        let mut output = vec![];
 
         output.push("Bit | color=orange".to_string());
 
@@ -23,19 +23,31 @@ impl Formatter<'_> {
                 .unwrap();
 
             let formatted = match &plugin_execution_result.result {
-                Ok(output) => format!("---
+                Ok(output) => format!(
+                    "---
 {} | color=green
 {}{}{}",
-                                      &plugin_execution_result.plugin,
-                                      if plugin_config.show_in_sub_menu { "" } else { "---\n" },
-                                      Formatter::show_in_sub_menu_if_needed(&output.stdout, plugin_config),
-                                      Formatter::show_in_sub_menu_if_needed(&output.stderr, plugin_config)),
-                Err(e) => format!("---
+                    &plugin_execution_result.plugin,
+                    if plugin_config.show_in_sub_menu {
+                        ""
+                    } else {
+                        "---\n"
+                    },
+                    Formatter::show_in_sub_menu_if_needed(&output.stdout, plugin_config),
+                    Formatter::show_in_sub_menu_if_needed(&output.stderr, plugin_config)
+                ),
+                Err(e) => format!(
+                    "---
 {} | color=green
 {}Error: {:?} | color=red",
-                                  &plugin_execution_result.plugin,
-                                  if plugin_config.show_in_sub_menu { "" } else { "---\n" },
-                                  e)
+                    &plugin_execution_result.plugin,
+                    if plugin_config.show_in_sub_menu {
+                        ""
+                    } else {
+                        "---\n"
+                    },
+                    e
+                ),
             };
             output.push(formatted);
         }
@@ -45,54 +57,60 @@ impl Formatter<'_> {
 
     fn show_in_sub_menu_if_needed(input: &str, plugin_config: &PluginConfig) -> String {
         if input.is_empty() {
-            return String::new()
+            return String::new();
         }
 
         if !plugin_config.show_in_sub_menu {
-            return input.to_string()
+            return input.to_string();
         }
 
-        input.split("\n")
+        input
+            .split("\n")
             .filter(|s| !s.is_empty())
             .map(|s| format!("--{}", s))
-            .collect::<Vec<String>>().join("\n")
+            .collect::<Vec<String>>()
+            .join("\n")
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use config::{Config, PluginConfig};
     use crate::exec;
+    use config::{Config, PluginConfig};
 
     #[test]
     fn format_returns_result_in_order_of_plugins_in_config() {
         let c = Config {
-            plugins: vec![PluginConfig {
-                display_name: "Plugin 1".to_string(),
-                command: "bash".to_string(),
-                args: vec!["-c".to_string(), "echo -n 'plugin-1'".to_string()],
-                show_in_sub_menu: false
-            }, PluginConfig {
-                display_name: "Plugin 3".to_string(),
-                command: "bash".to_string(),
-                args: vec!["-c".to_string(), "echo -n 'plugin-3'".to_string()],
-                show_in_sub_menu: false
-            }, PluginConfig {
-                display_name: "Plugin 2".to_string(),
-                command: "bash".to_string(),
-                args: vec!["-c".to_string(), "echo -n 'plugin-2'".to_string()],
-                show_in_sub_menu: false
-            }]
+            plugins: vec![
+                PluginConfig {
+                    display_name: "Plugin 1".to_string(),
+                    command: "bash".to_string(),
+                    args: vec!["-c".to_string(), "echo -n 'plugin-1'".to_string()],
+                    show_in_sub_menu: false,
+                },
+                PluginConfig {
+                    display_name: "Plugin 3".to_string(),
+                    command: "bash".to_string(),
+                    args: vec!["-c".to_string(), "echo -n 'plugin-3'".to_string()],
+                    show_in_sub_menu: false,
+                },
+                PluginConfig {
+                    display_name: "Plugin 2".to_string(),
+                    command: "bash".to_string(),
+                    args: vec!["-c".to_string(), "echo -n 'plugin-2'".to_string()],
+                    show_in_sub_menu: false,
+                },
+            ],
         };
 
         let e = new(&c);
 
-        let execution_results = vec!(
+        let execution_results = vec![
             exec::new_execution_result_with_output("Plugin 3", "plugin-3", ""),
             exec::new_execution_result_with_output("Plugin 2", "plugin-2", ""),
-            exec::new_execution_result_with_output("Plugin 1", "plugin-1", "")
-        );
+            exec::new_execution_result_with_output("Plugin 1", "plugin-1", ""),
+        ];
 
         let formatted = e.format(execution_results);
 
@@ -120,15 +138,17 @@ plugin-2";
                 display_name: "Plugin 1".to_string(),
                 command: "bash".to_string(),
                 args: vec!["-c".to_string(), "echo -n 'plugin-1'".to_string()],
-                show_in_sub_menu: true
-            }]
+                show_in_sub_menu: true,
+            }],
         };
 
         let e = new(&c);
 
-        let execution_results = vec!(
-            exec::new_execution_result_with_output("Plugin 1", "line 1\nline 2\nline 3\n", ""),
-        );
+        let execution_results = vec![exec::new_execution_result_with_output(
+            "Plugin 1",
+            "line 1\nline 2\nline 3\n",
+            "",
+        )];
 
         let formatted = e.format(execution_results);
 

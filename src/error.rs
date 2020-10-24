@@ -4,7 +4,7 @@ use std::{io, string};
 pub enum CliError {
     IO(io::Error),
     Deserialize(serde_yaml::Error),
-    StringFromUtf8(string::FromUtf8Error)
+    StringFromUtf8(string::FromUtf8Error),
 }
 
 impl From<io::Error> for CliError {

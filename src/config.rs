@@ -1,9 +1,9 @@
-use serde::Deserialize;
 use crate::error;
+use serde::Deserialize;
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct Config {
-    pub plugins: Vec<PluginConfig>
+    pub plugins: Vec<PluginConfig>,
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
@@ -14,7 +14,7 @@ pub struct PluginConfig {
     #[serde(default)]
     pub args: Vec<String>,
     #[serde(default, alias = "showInSubMenu")]
-    pub show_in_sub_menu: bool
+    pub show_in_sub_menu: bool,
 }
 
 pub fn from_file(path: &str) -> Result<Config, error::CliError> {

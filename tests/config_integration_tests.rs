@@ -6,19 +6,25 @@ fn from_file_returns_deserialized_configs_when_path_is_valid() {
     let result = config::from_file("./.bitbar-composite-plugin.yaml");
 
     assert!(result.is_ok());
-    assert_eq!(Config {
-        plugins: vec![PluginConfig {
-            display_name: "Plugin 1".to_string(),
-            command: "bash".to_string(),
-            args: vec!["-c".to_string(), "echo -n plugin-1".to_string()],
-            show_in_sub_menu: true
-        }, PluginConfig {
-            display_name: "Plugin 2".to_string(),
-            command: "bash".to_string(),
-            args: vec!["-c".to_string(), "echo -n plugin-2".to_string()],
-            show_in_sub_menu: false
-        }]
-    }, result.unwrap())
+    assert_eq!(
+        Config {
+            plugins: vec![
+                PluginConfig {
+                    display_name: "Plugin 1".to_string(),
+                    command: "bash".to_string(),
+                    args: vec!["-c".to_string(), "echo -n plugin-1".to_string()],
+                    show_in_sub_menu: true
+                },
+                PluginConfig {
+                    display_name: "Plugin 2".to_string(),
+                    command: "bash".to_string(),
+                    args: vec!["-c".to_string(), "echo -n plugin-2".to_string()],
+                    show_in_sub_menu: false
+                }
+            ]
+        },
+        result.unwrap()
+    )
 }
 
 #[test]
